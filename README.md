@@ -3,7 +3,7 @@
 > HuggingFaceTB SmolVLM2-500M-Video-Instruct DEMO on Axera.
 
 - 目前支持 `Python` 语言, `C++` 代码在开发中.
-- 预编译模型可以从[百度网盘]()下载.
+- 预编译模型可以从[百度网盘](https://pan.baidu.com/s/1udw7_IMQehr_2CmipfLOXw?pwd=n6qe)下载.
 - 如需自行导出编译 `VIT` 模型请参考 [模型转换](/model_convert/README.md).
 
 ## 支持平台
@@ -96,7 +96,7 @@ $ cd SmolVLM2-500M-Video-Instruct.axera/python
 │   └── infer_func.py
 └── vit-models
     ├── vision_model.axmodel
-    └── vision_model.onnx
+    └── vision_model.onnx [可选]
 ```
 
 ## 上板部署
@@ -131,69 +131,68 @@ $ export PATH=$PATH:/opt/site-packages/local/bin
 
 ```sh
 $ cd SmolVLM2-500M-Video-Instruct.axera/python
-$ python3 infer_axmodel_und.py
+$ python3 infer_axmodel.py
 ```
 
-默认输入图像为:
+输入图像为:
 
-![image.png](python/imgs/image.png)
+![image.png](assets/girl.png)
 
-也可以通过命令行参数手动指定图像路径. 模型推理结果如下:
+通过命令行参数可以手动指定图像路径, 模型推理结果如下:
 
 ```bash
-[INFO] Chip type: ChipType.MC50
-[INFO] VNPU type: VNPUType.DISABLED
-[INFO] Engine version: 2.11.0a
-vit_output.shape is (1, 576, 2048), vit feature extract done!
-Init InferenceSession: 100%|██████████████████████████████████████████████████████████| 24/24 [00:06<00:00,  3.89it/s]
-model load done!
-prefill done!
-Decoder:  62%|█████████████████████████████████████████▍                         | 634/1024 [00:00<00:00, 2493.31it/s]Decoder:  72%|█████████████████████████████████████████████████▍                   | 733/1024 [00:18<00:09, 29.61it/s]hit eos!
-Decoder:  74%|███████████████████████████████████████████████████▎                 | 762/1024 [00:23<00:08, 32.02it/s]
-这幅图展示了三位穿着宇航服的宇航员，他们站在一片茂密的植被中。宇航员们的头盔上有反光面罩，可以看到他们的面容。背景是一片森林，树木和植物的细节非常清晰。宇航员们的姿势各不相同，其中一位宇航员正举起双手，似乎在向某人挥手，另一位宇航员则站立着，目光向前方看去，第三位宇航员则弯腰靠近地面，似乎在观察地面上的某物。整体画面给人一种科幻和探索的感觉，仿佛他们正在进行一次太空探险任务。
+$ python3 infer_axmodel.py -i ../assets/girl.png --vit_model vit-models/vision_model.axmodel
+
+Model loaded successfully!
+slice_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+Slice prefill done: 0
+Slice prefill done: 1
+Slice prefill done: 2
+Slice prefill done: 3
+Slice prefill done: 4
+Slice prefill done: 5
+Slice prefill done: 6
+Slice prefill done: 7
+Slice prefill done: 8
+answer >>  The image depicts a young woman with long, light gray hair, adorned with two pink flowers in her hair. She is standing on a beach, facing the camera with a neutral expression. The woman is wearing a blue off-shoulder dress that is open at the front, revealing^@ a white lace top underneath. She is also wearing a silver choker necklace and a silver bracelet on her left wrist.
+
+The background of the image reveals a clear blue sky with fluffy white clouds, suggesting a sunny day. The ocean is visible in the distance, with gentle waves crashing onto the shore. The overall scene suggests a serene and peaceful beach setting.
+
+The woman's attire and accessories, along with the serene ocean and clear sky, create a calm and picturesque atmosphere. The image does not contain any^@ discernible text or additional objects. The relative positions of the objects suggest that the woman is standing in the foreground, with the ocean and sky in the background. The image does not provide any information that would allow for a specific question to be answered definitively.
 ```
-
-在 `Axera 开发板` 上运行以下命令实现图像生成:
-
-```sh
-$ cd SmolVLM2-500M-Video-Instruct.axera/python
-$ python3 infer_axmodel_gen.py
-```
-
-预设 `prompt` 为: `"A close-up high-contrast photo of Sydney Opera House sitting next to Eiffel tower, under a blue night sky of roiling energy, exploding yellow stars, and radiating swirls of blue."`
-
-生成的图像保存在 `./generated_samples/` 文件夹下:
-
-![output](assets/gen_out_img.jpg)
 
 #### 图像理解任务·推理耗时统计
 
+该模型一共有 `32` 层 `decode layer`, 详细耗时信息如下:
+
 Model | Time |
 ---| ---|
-ImageEncoder | 142.682 ms |
-Prefill TTFT | 4560.214 ms |
-Decoder | 87.48 ms |
+ImageEncoder | 1830 ms |
+Prefill TTFT | 2892.151 ms |
+Decoder | 27.51 ms |
 
 其中:
 
-- `Prefill` 阶段, 每一层的 `llama_layer` 平均耗时 `189.565 ms`.
-- `Decoder` 阶段, 每一层的 `llama_layer` 平均耗时 `3.201` ms.
-- `llama_post` 耗时 `10.654 ms`.
+- `Prefill` 阶段, 每一层的 `llama_layer` 最大耗时 `90.3 ms`.
 
-模型解码速度为: 1000 / 87.48ms = 11.43 tokens/s.
+    各个子图耗时:
 
-#### 图像生成任务·推理耗时统计 (1 token)
+    ```sh
+    g1: 3.143 ms
+    g2: 4.909 ms
+    g3: 6.610 ms
+    g4: 8.263 ms
+    g5: 9.997 ms
+    g6: 11.819 ms
+    g7: 13.579 ms
+    g8: 15.096 ms
+    g9: 16.814 ms
+    ```
 
-Model | Time |
----| ---|
-llama prefill g1 | 189.565 ms * 24 * 2 |
-llama decode g0 | 3.201 ms * 24 * 2 |
-norm & gen_head | 40 ms
-gen_aligner | 2.0 ms
+- `Decoder` 阶段, 每一层的 `llama_layer` 平均耗时 `0.780 ms` ms.
+- `llama_post` 耗时 `2.551 ms`.
 
-生成 `384x384` 分辨率的图像默认使用 `576` 个 `token` (1 个 prefill + 575 decode).
-
-最后使用 `gen_vision_model_decode` 获取图像结果, 该模块耗时 `17507.68 ms`.
+模型解码速度为: 1000 / 27.51 ms = 36.35 tokens/s.
 
 ## 技术讨论
 
