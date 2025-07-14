@@ -1,0 +1,11 @@
+__pycache__
+*.tar
+build-output/
+*.onnx
+*.pth
+*.axmodel
+*.npy
+compiled*
+tmp/
+SmolVLM2-500M-Video-Instruct/
+SmolVLM2-500M-Video-Instruct_axmodel/
