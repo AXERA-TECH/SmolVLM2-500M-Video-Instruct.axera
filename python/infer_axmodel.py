@@ -159,7 +159,7 @@ if __name__ == "__main__":
     prompt = args.question
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    embeddings = torch.load("SmolVLMVisionEmbeddings.pkl", map_location=device, weights_only=False)
+    embeddings = torch.load("./embeds/SmolVLMVisionEmbeddings.pkl", map_location=device, weights_only=False)
     embeds = np.load(os.path.join(axmodel_path, "model.embed_tokens.weight.npy"))
 
     encoder = InferenceSession(args.vit_model)
